@@ -24,6 +24,8 @@
 #include "DDDB/DDDBReaderContext.h"
 #include "DD4hep/ComponentProperties.h"
 
+/// C++ include files
+#include <set>
 
 /// Namespace for the AIDA detector description toolkit
 namespace dd4hep {
@@ -55,28 +57,39 @@ namespace dd4hep {
       /// Access data match
       const std::string& match() const           { return m_match;      }
       /// Access to local context
-      virtual UserContext* context();
+      virtual UserContext* context()   override;
 
       /// Process load request. Calls getObject at the end.            */
       /// Resolve a given URI to a string containing the data
-      virtual bool load(const std::string& system_id, std::string& buffer);
+      virtual bool load(const std::string& system_id, std::string& buffer)  override;
       /// Resolve a given URI to a string containing the data
-      virtual bool load(const std::string& system_id, UserContext* ctxt, std::string& buffer);
+      virtual bool load(const std::string& system_id, UserContext* ctxt, std::string& buffer)  override;
       /** If you have to modify intervals of validity, do it in here.
        *  Only this routine is called by EVERY parsing request
        */
       /// Inform reader about a locally (e.g. by XercesC) handled source load
-      virtual void parserLoaded(const std::string& system_id);
+      virtual void parserLoaded(const std::string& system_id)  override;
       /// Inform reader about a locally (e.g. by XercesC) handled source load
-      virtual void parserLoaded(const std::string& system_id, UserContext* ctxt);
+      virtual void parserLoaded(const std::string& system_id, UserContext* ctxt)  override;
 
       /** Main object reader routine                                   */
       /// Read raw XML object from the database / file
       virtual int getObject(const std::string& system_id, UserContext* ctxt, std::string& data) = 0;
 
+
+      /** Helpers for selective parsing  */
+      /// Add a blocked path entry
+      virtual void blockPath(const std::string& path)  override;
+      /// Check if a URI path is blocked
+      virtual bool isBlocked(const std::string& path)  const  override;
+      
     protected:
+      /// File directory
       std::string       m_directory;
+      /// URI match string to invoke entity resolution
       std::string       m_match;
+      /// Blocked URI pathes
+      std::set<std::string> m_blockedPathes;
       /// Reader context
       DDDBReaderContext m_context;
     };
